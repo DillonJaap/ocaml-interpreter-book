@@ -1,25 +1,20 @@
 open Core
 
-type lexer =
-  { pos : int
-  ; read_pos : int
-  ; input : string
-  ; ch : char
-  }
-
-let new_lexer input = { pos = 0; read_pos = 0; input; ch = ' ' }
-
-let read_char lex =
-  let ch =
-    match lex.read_pos with
-    | r when r >= String.length lex.input -> Char.of_int_exn 0
-    | _ -> String.get lex.input lex.read_pos
+let get_all_tokens lex =
+  let open Monkey_lexer in
+  let rec aux lex token_list =
+    match next_token lex with
+    | Some lex', token -> aux lex' (token :: token_list)
+    | None, token -> List.rev (token :: token_list)
   in
-  { lex with ch; read_pos = lex.read_pos + 1; pos = lex.read_pos }
+  aux lex []
 ;;
 
 let _ =
-  let lex = new_lexer "test" in
-  let new_lex = read_char lex in
-  new_lex
+  let open Monkey_lexer in
+  match new_lexer {|"test" + |} with
+  | None -> ()
+  | Some lex ->
+    let tokens = get_all_tokens lex in
+    List.iter tokens ~f:(fun t -> print_endline (Tokens.as_string t))
 ;;
