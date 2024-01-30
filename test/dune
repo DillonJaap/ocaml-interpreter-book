@@ -1,2 +1,5 @@
 (test
- (name interpreter))
+ (name test)
+ (libraries core lib)
+ (preprocess
+  (pps ppx_inline_test ppx_assert ppx_expect)))

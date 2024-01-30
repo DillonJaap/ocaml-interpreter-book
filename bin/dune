@@ -1,6 +1,6 @@
 (executable
  (public_name interpreter)
  (name main )
- (libraries core )
+ (libraries core lib)
   (preprocess
   (pps ppx_deriving.show)))

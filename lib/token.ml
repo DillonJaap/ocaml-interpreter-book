@@ -14,7 +14,7 @@ type t =
   | Asterisk
   | Slash
   | Less_Than
-  | Great_Than
+  | Greater_Than
   (* Delimiters *)
   | Comma
   | Semicolon
@@ -38,6 +38,9 @@ type t =
   (* other *)
   | String of string
   | Colon
+  (* TODO - remove this after the parser is complete *)
+  | TODO
+[@@deriving sexp_of, compare, show]
 
 let as_string = function
   | Illegal -> "Illegal"
@@ -53,7 +56,7 @@ let as_string = function
   | Asterisk -> "*"
   | Slash -> "/"
   | Less_Than -> "<"
-  | Great_Than -> ">"
+  | Greater_Than -> ">"
   (* Delimiters *)
   | Comma -> ","
   | Semicolon -> ";"
@@ -77,7 +80,7 @@ let as_string = function
   (* other *)
   | String s -> sprintf {|"%s"|} s
   | Colon -> ":"
-;;
+  | TODO -> "TODO Remove this token"
 
 let look_up_ident ident =
   match ident with
@@ -89,4 +92,3 @@ let look_up_ident ident =
   | "else" -> Else
   | "return" -> Return
   | _ -> Identifier ident
-;;
