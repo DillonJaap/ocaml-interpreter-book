@@ -1,8 +1,8 @@
 (library
  (name lib)
  (modules token lexer t_lexer ast parser)
- (libraries core )
+ (libraries core)
  (inline_tests)
  (preprocess
-  (pps ppx_jane ppx_inline_test ppx_assert ppx_expect ppx_deriving.show)))
+  (pps ppx_jane ppx_inline_test ppx_assert ppx_expect )))
 

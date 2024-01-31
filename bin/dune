@@ -3,4 +3,4 @@
  (name main )
  (libraries core lib)
   (preprocess
-  (pps ppx_deriving.show)))
+  (pps ppx_jane)))
