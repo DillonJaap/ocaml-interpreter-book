@@ -8,11 +8,11 @@ type _node =
 and statement =
   | Expression_Statement of expression
   | Block_Statement of _block_statement
-  | Let of { name : _identifier; value : expression }
+  | Let of { name : identifier; value : expression }
   | Return of expression
 
 and expression =
-  | Identifier of _identifier
+  | Identifier of identifier
   | Integer_Literal of int64
   | String_Literal of string
   | Boolean of bool
@@ -30,7 +30,7 @@ and expression =
       alternate : _block_statement;
     }
   | Function_Literal of {
-      parameters : _identifier list;
+      parameters : identifier list;
       body : _block_statement;
     }
   | Call_Expression of { function_ : expression; arguments : expression list }
@@ -39,4 +39,4 @@ and expression =
 and _block_statement = expression list
 
 (* todo this complains about two fields with the same name *)
-and _identifier = string
+and identifier = string
