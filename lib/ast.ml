@@ -9,7 +9,7 @@ and statement =
   | Expression_Statement of expression
   | Block_Statement of _block_statement
   | Let of { name : identifier; value : expression }
-  | Return of expression
+  | Return of { value : expression }
 
 and expression =
   | Identifier of identifier
