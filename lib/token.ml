@@ -40,7 +40,7 @@ type t =
   | Colon
   (* TODO - remove this after the parser is complete *)
   | TODO
-[@@deriving sexp_of, compare]
+[@@deriving sexp_of, compare, show]
 
 let as_string = function
   | Illegal -> "Illegal"

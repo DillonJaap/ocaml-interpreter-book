@@ -4,18 +4,20 @@ type _node =
   | Program of statement list
   | Statement of statement
   | Expression of expression
+[@@deriving sexp_of, compare]
 
 and statement =
-  | Expression_Statement of expression
+  | Expression_Statement of { value : expression }
   | Block_Statement of _block_statement
   | Let of { name : identifier; value : expression }
   | Return of { value : expression }
+[@@deriving sexp_of, compare]
 
 and expression =
-  | Identifier of identifier
-  | Integer_Literal of int64
-  | String_Literal of string
-  | Boolean of bool
+  | Identifier of { value : identifier }
+  | Integer_Literal of { value : int }
+  | String_Literal of { value : string }
+  | Boolean of { value : bool }
   | Array_Literal of expression list
   | Hash_Literal of (expression * expression) list
   | Prefix_Expression of { operator : string; right : expression }
@@ -35,8 +37,9 @@ and expression =
     }
   | Call_Expression of { function_ : expression; arguments : expression list }
   | Index_Expression of { left : expression; index : expression }
+[@@deriving sexp_of, compare]
 
-and _block_statement = expression list
+and _block_statement = expression list [@@deriving sexp_of, compare]
 
 (* todo this complains about two fields with the same name *)
-and identifier = string
+and identifier = string [@@deriving sexp_of, compare]

@@ -1,7 +1,6 @@
 open Core
 
-type t = { read_pos : int; input : string; ch : char option }
-(*  [@@deriving show] *)
+type t = { read_pos : int; input : string; ch : char option } [@@deriving show]
 
 (* update this to return option *)
 let advance lex =

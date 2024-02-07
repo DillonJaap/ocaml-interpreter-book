@@ -1,4 +1,4 @@
-type t
+type t [@@deriving show]
 
 val advance : t -> t
 val new_lexer : string -> t
