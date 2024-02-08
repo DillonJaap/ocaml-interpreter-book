@@ -184,15 +184,15 @@ and parse_identifier_expression parser =
 and parse_string_literal parser =
   match parser.current with
   | String value -> Ok (parser, Ast.String_Literal { value })
-  | _ -> Error "expected identifier"
+  | _ -> Error "expected string"
 
 and parse_boolean_literal parser =
   match parser.current with
   | True -> Ok (parser, Ast.Boolean { value = true })
   | False -> Ok (parser, Ast.Boolean { value = false })
-  | _ -> Error "expected identifier"
+  | _ -> Error "expected boolean"
 
 and parse_integer_literal parser =
   match parser.current with
   | Integer value -> Ok (parser, Ast.Integer_Literal { value })
-  | _ -> Error "expected identifier"
+  | _ -> Error "expected integer"
