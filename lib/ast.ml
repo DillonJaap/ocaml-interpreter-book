@@ -4,14 +4,14 @@ type _node =
   | Program of statement list
   | Statement of statement
   | Expression of expression
-[@@deriving sexp_of, compare]
+[@@deriving sexp_of, compare, show]
 
 and statement =
   | Expression_Statement of { value : expression }
   | Block_Statement of _block_statement
   | Let of { name : identifier; value : expression }
   | Return of { value : expression }
-[@@deriving sexp_of, compare]
+[@@deriving sexp_of, compare, show]
 
 and expression =
   | Identifier of { value : identifier }
@@ -37,9 +37,9 @@ and expression =
     }
   | Call_Expression of { function_ : expression; arguments : expression list }
   | Index_Expression of { left : expression; index : expression }
-[@@deriving sexp_of, compare]
+[@@deriving sexp_of, compare, show]
 
-and _block_statement = expression list [@@deriving sexp_of, compare]
+and _block_statement = expression list [@@deriving sexp_of, compare, show]
 
 (* todo this complains about two fields with the same name *)
-and identifier = string [@@deriving sexp_of, compare]
+and identifier = string [@@deriving sexp_of, compare, show]

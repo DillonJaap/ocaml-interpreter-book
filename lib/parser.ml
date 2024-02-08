@@ -37,12 +37,14 @@ let advance parser =
   { parser with current = parser.peek; lexer; peek }
 
 let skip parser ~token =
-  match Token.compare token parser.peek with 0 -> advance parser | _ -> parser
+  match Token.compare token parser.peek = 0 with
+  | true -> advance parser
+  | false -> parser
 
 let expect_and_advance parser ~token =
-  match Token.compare token parser.peek with
-  | 0 -> Ok (advance parser)
-  | _ ->
+  match Token.compare token parser.peek = 0 with
+  | true -> Ok (advance parser)
+  | false ->
       Error
         (sprintf "expected token: %s, got token %s" (Token.as_string token)
            (Token.as_string parser.peek))
@@ -98,16 +100,13 @@ and parse_expression_statement parser =
   Ok (parser, Ast.Expression_Statement { value = expr })
 
 and parse_expression parser prec =
-  printf "token: %s\n" (Token.as_string parser.current);
   let%bind parser, lexpr = parse_prefix_expression parser in
   let rec aux parser lexpr =
     let comp = compare_precidence (get_precidence parser.peek) prec in
     match (parser.peek, comp) with
-    | Semicolon, _ | _, 0 | _, -1 ->
-        print_endline "exit";
-        Ok (parser, lexpr)
+    | Semicolon, _ -> Ok (parser, lexpr)
+    | _, (0 | -1) -> Ok (parser, lexpr)
     | _, 1 ->
-        print_endline "I am here";
         let%bind parser, lexpr =
           parse_infix_expression (advance parser) lexpr
         in
@@ -121,12 +120,9 @@ and parse_infix_expression parser left =
   | Plus | Minus | Slash | Asterisk | Equal | Not_Equal | Less_Than
   | Greater_Than ->
       parse_default_infix_expression parser left
-  | Lparen -> Error "TODO add parse func"
+  | Lparen -> parse_call_expression parser left
   | Lbracket -> Error "TODO add parse func"
-  | _ ->
-      Error
-        ("No INFIX parse function registered for token "
-        ^ Token.as_string parser.current)
+  | _ -> Ok (parser, left)
 
 and parse_default_infix_expression parser left =
   let prec = get_precidence parser.current in
@@ -139,19 +135,23 @@ and parse_call_expression parser function_ =
   Ok (parser, Ast.Call_Expression { function_; arguments })
 
 and parse_expression_list (parser : t) (end_token : Token.t) =
+  let parser = advance parser in
   let rec aux (parser : t) (exprs : Ast.expression list) =
-    match parser.peek with
-    | Comma ->
-        let parser = advance @@ advance parser in
-        let%bind parser, expr = parse_expression parser `Lowest in
-        aux parser (expr :: exprs)
-    | _ ->
+    let%bind parser, expr = parse_expression parser `Lowest in
+    let is_end_token = Token.compare parser.peek end_token = 0 in
+
+    match (parser.peek, is_end_token) with
+    | _, true ->
         let%bind parser = expect_and_advance parser ~token:end_token in
-        Ok (parser, List.rev exprs)
+        Ok (advance parser, List.rev (expr :: exprs))
+    | Comma, _ ->
+        let parser = advance @@ advance parser in
+        aux parser (expr :: exprs)
+    | _ -> Error "expected end token or comma"
   in
-  match Token.compare parser.peek end_token with
-  | 0 -> Ok (advance parser, [])
-  | _ -> aux parser []
+  match Token.compare parser.current end_token = 0 with
+  | true -> Ok (advance parser, [])
+  | false -> aux parser []
 
 and parse_prefix_expression parser =
   match parser.current with
