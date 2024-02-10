@@ -84,7 +84,9 @@ and parse_let_statement parser =
   let parser = advance parser in
   let%bind parser, name = parse_identifier parser in
   let%bind parser = expect_and_advance parser ~token:Token.Assign in
-  let%bind parser, value = parse_expression (advance parser) `Lowest in
+
+  let parser = advance parser in
+  let%bind parser, value = parse_expression parser `Lowest in
   let parser = skip parser ~token:Token.Semicolon in
   Ok (parser, Ast.Let { name; value })
 
@@ -121,7 +123,7 @@ and parse_infix_expression parser left =
   | Greater_Than ->
       parse_default_infix_expression parser left
   | Lparen -> parse_call_expression parser left
-  | Lbracket -> Error "TODO add parse func"
+  | Lbracket -> parse_index_expression parser left
   | _ -> Ok (parser, left)
 
 and parse_default_infix_expression parser left =
@@ -134,6 +136,12 @@ and parse_call_expression parser function_ =
   let%bind parser, arguments = parse_expression_list parser Token.Rparen in
   Ok (parser, Ast.Call_Expression { function_; arguments })
 
+and parse_index_expression parser left =
+  let parser = advance parser in
+  let%bind parser, expr = parse_expression parser `Lowest in
+  let%bind parser = expect_and_advance parser ~token:Token.Rbracket in
+  Ok (parser, Ast.Index_Expression { left; index = expr })
+
 and parse_expression_list (parser : t) (end_token : Token.t) =
   let parser = advance parser in
   let rec aux (parser : t) (exprs : Ast.expression list) =
@@ -143,14 +151,14 @@ and parse_expression_list (parser : t) (end_token : Token.t) =
     match (parser.peek, is_end_token) with
     | _, true ->
         let%bind parser = expect_and_advance parser ~token:end_token in
-        Ok (advance parser, List.rev (expr :: exprs))
+        Ok (parser, List.rev (expr :: exprs))
     | Comma, _ ->
         let parser = advance @@ advance parser in
         aux parser (expr :: exprs)
     | _ -> Error "expected end token or comma"
   in
   match Token.compare parser.current end_token = 0 with
-  | true -> Ok (advance parser, [])
+  | true -> Ok (parser, [])
   | false -> aux parser []
 
 and parse_prefix_expression parser =
@@ -159,7 +167,12 @@ and parse_prefix_expression parser =
   | Identifier _ -> parse_identifier_expression parser
   | Integer _ -> parse_integer_literal parser
   | String _ -> parse_string_literal parser
-  | Lbracket -> Error "TODO add parse func"
+  | True | False -> parse_boolean_literal parser
+  | Lparen -> parse_grouped_expression parser
+  | Lbracket -> parse_array_literal parser
+  | Lbrace -> parse_hash_literal parser
+  | Function -> parse_function_literal parser
+  | If -> parse_if_expression parser
   | _ ->
       Error
         ("No PREFIX parse function registered for token "
@@ -196,3 +209,89 @@ and parse_integer_literal parser =
   match parser.current with
   | Integer value -> Ok (parser, Ast.Integer_Literal { value })
   | _ -> Error "expected integer"
+
+and parse_grouped_expression parser =
+  let parser = advance parser in
+  let%bind parser, expr = parse_expression parser `Lowest in
+  let%bind parser = expect_and_advance parser ~token:Token.Rparen in
+  Ok (parser, expr)
+
+and parse_if_expression parser =
+  let%bind parser = expect_and_advance parser ~token:Token.Lparen in
+  let%bind parser, condition = parse_expression parser `Lowest in
+  let%bind parser = expect_and_advance parser ~token:Token.Lbrace in
+  let%bind parser, consequence = parse_block_statement parser in
+
+  let alternate : Ast.block_statement = [] in
+  match parser.peek with
+  | Else ->
+      let parser = advance parser in
+      let%bind parser = expect_and_advance parser ~token:Token.Lbrace in
+      let%bind parser, alternate = parse_block_statement parser in
+      Ok (parser, Ast.If_Expression { condition; consequence; alternate })
+  | _ -> Ok (parser, Ast.If_Expression { condition; consequence; alternate })
+
+and parse_block_statement parser =
+  let parser = advance parser in
+  let rec aux parser stmts =
+    match parser.current with
+    | Rbrace | EOF -> Ok (parser, List.rev stmts)
+    | _ ->
+        let%bind parser, stmt = parse_statement parser in
+        aux (advance parser) (stmt :: stmts)
+  in
+  aux parser []
+
+and parse_function_literal parser =
+  let%bind parser = expect_and_advance parser ~token:Token.Lparen in
+  let%bind parser, parameters = parse_function_parameters parser in
+  let%bind parser = expect_and_advance parser ~token:Token.Lbrace in
+  let%bind parser, body = parse_block_statement parser in
+  Ok (parser, Ast.Function_Literal { parameters; body })
+
+and parse_function_parameters parser =
+  let parser = advance parser in
+  let rec aux parser idents =
+    let%bind parser, ident = parse_identifier parser in
+    let is_end_token = Token.compare parser.peek Token.Rparen = 0 in
+
+    match (parser.peek, is_end_token) with
+    | _, true ->
+        let%bind parser = expect_and_advance parser ~token:Token.Rparen in
+        Ok (parser, List.rev (ident :: idents))
+    | Comma, _ ->
+        let parser = advance @@ advance parser in
+        aux parser (ident :: idents)
+    | _ -> Error "expected end token or comma"
+  in
+  match Token.compare parser.current Token.Rparen = 0 with
+  | true -> Ok (parser, [])
+  | false -> aux parser []
+
+and parse_array_literal parser =
+  let%bind parser, value = parse_expression_list parser Token.Rbracket in
+  Ok (parser, Ast.Array_Literal { value })
+
+and parse_hash_literal (parser : t) =
+  let parser = advance parser in
+  let rec aux (parser : t) (hashes : (Ast.expression * Ast.expression) list) =
+    let%bind parser, key = parse_expression parser `Lowest in
+
+    let%bind parser = expect_and_advance parser ~token:Token.Colon in
+    let parser = advance parser in
+
+    let%bind parser, value = parse_expression parser `Lowest in
+
+    let is_end_token = Token.compare parser.peek Token.Rbrace = 0 in
+    match (parser.peek, is_end_token) with
+    | _, true ->
+        let%bind parser = expect_and_advance parser ~token:Token.Rbrace in
+        Ok (parser, Ast.Hash_Literal (List.rev ((key, value) :: hashes)))
+    | Comma, _ ->
+        let parser = advance @@ advance parser in
+        aux parser ((key, value) :: hashes)
+    | _ -> Error "expected end token or comma"
+  in
+  match Token.compare parser.current Token.Rbrace = 0 with
+  | true -> Ok (parser, Ast.Hash_Literal [])
+  | false -> aux parser []

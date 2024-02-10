@@ -15,17 +15,10 @@ let advance lex =
 
 let new_lexer input = advance { read_pos = 0; input; ch = Some ' ' }
 
-(* Do I need this? *)
 let peek_char lex =
   match lex.read_pos with
   | r when r >= String.length lex.input -> None
   | _ -> Some (String.get lex.input lex.read_pos)
-
-(* Do I need this? *)
-let peek_char_is lex ch =
-  match lex.read_pos with
-  | r when r >= String.length lex.input -> false
-  | _ -> Char.equal (String.get lex.input lex.read_pos) ch
 
 let rec skip_whitespace lex =
   match lex.ch with
@@ -52,16 +45,13 @@ let read_identifier lex =
   aux lex ""
 
 let read_string lex =
-  match lex.ch with
-  | Some '"' ->
-      let rec aux lex str =
-        match lex.ch with
-        | Some '"' -> (lex, str)
-        | Some ch -> aux (advance lex) (str ^ String.of_char ch)
-        | None -> (lex, str)
-      in
-      aux (advance lex) ""
-  | _ -> (lex, "")
+  let rec aux lex str =
+    match lex.ch with
+    | Some '"' -> (lex, str)
+    | Some ch -> aux (advance lex) (str ^ String.of_char ch)
+    | None -> (lex, str)
+  in
+  match lex.ch with Some '"' -> aux (advance lex) "" | _ -> (lex, "")
 
 let next_token lex =
   let open Token in
@@ -74,12 +64,12 @@ let next_token lex =
       | '=' -> (
           match peek_char lex with
           | None -> (lex, EOF)
-          | Some '=' -> (advance (advance lex), Equal)
+          | Some '=' -> (advance @@ advance lex, Equal)
           | Some _ -> (advance lex, Assign))
       | '!' -> (
           match peek_char lex with
           | None -> (lex, EOF)
-          | Some '=' -> (advance (advance lex), Not_Equal)
+          | Some '=' -> (advance @@ advance lex, Not_Equal)
           | Some _ -> (advance lex, Bang))
       | '+' -> (advance lex, Plus)
       | '-' -> (advance lex, Minus)
