@@ -1,7 +1,7 @@
 open Core
 open Result.Let_syntax
 
-(*  let ( let* ) res f = Result.bind res ~f *)
+let ( let* ) res f = match res with Ok x -> f x | Error e -> Error e
 
 type t = {
   lexer : Lexer.t;

@@ -2,7 +2,6 @@ open Core
 
 type t = { read_pos : int; input : string; ch : char option } [@@deriving show]
 
-(* update this to return option *)
 let advance lex =
   match lex.read_pos with
   | r when r >= String.length lex.input -> { lex with ch = None }
