@@ -191,12 +191,12 @@ and parse_identifier parser =
 
 and parse_identifier_expression parser =
   match parser.current with
-  | Identifier value -> Ok (parser, Ast.Identifier { value })
+  | Identifier value -> Ok (parser, Ast.Identifier value)
   | _ -> Error "expected identifier"
 
 and parse_string_literal parser =
   match parser.current with
-  | String value -> Ok (parser, Ast.String_Literal { value })
+  | String value -> Ok (parser, Ast.String_Literal value)
   | _ -> Error "expected string"
 
 and parse_boolean_literal parser =
@@ -207,7 +207,7 @@ and parse_boolean_literal parser =
 
 and parse_integer_literal parser =
   match parser.current with
-  | Integer value -> Ok (parser, Ast.Integer_Literal { value })
+  | Integer value -> Ok (parser, Ast.Integer_Literal value)
   | _ -> Error "expected integer"
 
 and parse_grouped_expression parser =

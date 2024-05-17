@@ -13,9 +13,9 @@ and statement =
 [@@deriving sexp_of, compare, show]
 
 and expression =
-  | Identifier of { value : identifier }
-  | Integer_Literal of { value : int }
-  | String_Literal of { value : string }
+  | Identifier of identifier
+  | Integer_Literal of int
+  | String_Literal of string
   | Boolean of { value : bool }
   | Array_Literal of { value : expression list }
   | Hash_Literal of (expression * expression) list

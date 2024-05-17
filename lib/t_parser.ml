@@ -7,9 +7,9 @@ let%test_unit "test let statement" =
   [%test_eq: Ast.statement list]
     (new_test_parser {|let five = 5; let five = "5"; let foo = bar;|})
     [
-      Ast.Let { name = "five"; value = Ast.Integer_Literal { value = 5 } };
-      Ast.Let { name = "five"; value = Ast.String_Literal { value = "5" } };
-      Ast.Let { name = "foo"; value = Ast.Identifier { value = "bar" } };
+      Ast.Let { name = "five"; value = Ast.Integer_Literal 5 };
+      Ast.Let { name = "five"; value = Ast.String_Literal "5" };
+      Ast.Let { name = "foo"; value = Ast.Identifier "bar" };
     ]
 
 let%test_unit "test infix and prefix expressions" =
@@ -21,9 +21,9 @@ let%test_unit "test infix and prefix expressions" =
           value =
             Ast.Infix_Expression
               {
-                left = Ast.Integer_Literal { value = 5 };
+                left = Ast.Integer_Literal 5;
                 operator = "+";
-                right = Ast.Integer_Literal { value = 5 };
+                right = Ast.Integer_Literal 5;
               };
         };
       Ast.Let
@@ -32,14 +32,14 @@ let%test_unit "test infix and prefix expressions" =
           value =
             Ast.Infix_Expression
               {
-                left = Ast.Integer_Literal { value = 5 };
+                left = Ast.Integer_Literal 5;
                 operator = "+";
                 right =
                   Ast.Infix_Expression
                     {
-                      left = Ast.Integer_Literal { value = 8 };
+                      left = Ast.Integer_Literal 8;
                       operator = "*";
-                      right = Ast.Integer_Literal { value = 6 };
+                      right = Ast.Integer_Literal 6;
                     };
               };
         };
@@ -49,7 +49,7 @@ let%test_unit "test infix and prefix expressions" =
 let%test_unit "test return statement" =
   [%test_eq: Ast.statement list]
     (new_test_parser {|return "TODO temp";|})
-    [ Ast.Return { value = Ast.String_Literal { value = "TODO temp" } } ]
+    [ Ast.Return { value = Ast.String_Literal "TODO temp" } ]
 
 let%test_unit "test call expression" =
   [%test_eq: Ast.statement list]
@@ -60,16 +60,16 @@ let%test_unit "test call expression" =
           value =
             Ast.Call_Expression
               {
-                function_ = Ast.Identifier { value = "test" };
+                function_ = Ast.Identifier "test";
                 arguments =
                   [
-                    Ast.Identifier { value = "arg" };
-                    Ast.Integer_Literal { value = 1 };
+                    Ast.Identifier "arg";
+                    Ast.Integer_Literal 1;
                     Ast.Infix_Expression
                       {
-                        left = Ast.Integer_Literal { value = 1 };
+                        left = Ast.Integer_Literal 1;
                         operator = "+";
-                        right = Ast.Integer_Literal { value = 1 };
+                        right = Ast.Integer_Literal 1;
                       };
                   ];
               };
@@ -78,7 +78,7 @@ let%test_unit "test call expression" =
         {
           value =
             Ast.Call_Expression
-              { function_ = Ast.Identifier { value = "test" }; arguments = [] };
+              { function_ = Ast.Identifier "test"; arguments = [] };
         };
     ]
 
@@ -90,10 +90,7 @@ let%test_unit "test index expression" =
         {
           value =
             Ast.Index_Expression
-              {
-                left = Ast.Identifier { value = "test" };
-                index = Ast.Integer_Literal { value = 5 };
-              };
+              { left = Ast.Identifier "test"; index = Ast.Integer_Literal 5 };
         };
     ]
 
@@ -103,31 +100,20 @@ let%test_unit "test array and hash literal" =
     [
       Ast.Expression_Statement { value = Ast.Array_Literal { value = [] } };
       Ast.Expression_Statement
-        {
-          value =
-            Ast.Array_Literal { value = [ Ast.Integer_Literal { value = 2 } ] };
-        };
+        { value = Ast.Array_Literal { value = [ Ast.Integer_Literal 2 ] } };
       Ast.Expression_Statement
         {
           value =
             Ast.Array_Literal
-              {
-                value =
-                  [
-                    Ast.Integer_Literal { value = 1 };
-                    Ast.Integer_Literal { value = 2 };
-                  ];
-              };
+              { value = [ Ast.Integer_Literal 1; Ast.Integer_Literal 2 ] };
         };
       Ast.Expression_Statement
         {
           value =
             Ast.Hash_Literal
               [
-                ( Ast.String_Literal { value = "one" },
-                  Ast.Integer_Literal { value = 1 } );
-                ( Ast.String_Literal { value = "two" },
-                  Ast.Integer_Literal { value = 2 } );
+                (Ast.String_Literal "one", Ast.Integer_Literal 1);
+                (Ast.String_Literal "two", Ast.Integer_Literal 2);
               ];
         };
     ]
@@ -149,9 +135,9 @@ let%test_unit "test function literal" =
                         value =
                           Ast.Infix_Expression
                             {
-                              left = Ast.Identifier { value = "x" };
+                              left = Ast.Identifier "x";
                               operator = "+";
-                              right = Ast.Identifier { value = "y" };
+                              right = Ast.Identifier "y";
                             };
                       };
                   ];
@@ -171,15 +157,12 @@ let%test_unit "test if expression" =
                 condition =
                   Ast.Infix_Expression
                     {
-                      left = Ast.Identifier { value = "x" };
+                      left = Ast.Identifier "x";
                       operator = "<";
-                      right = Ast.Identifier { value = "y" };
+                      right = Ast.Identifier "y";
                     };
                 consequence =
-                  [
-                    Ast.Expression_Statement
-                      { value = Ast.Identifier { value = "x" } };
-                  ];
+                  [ Ast.Expression_Statement { value = Ast.Identifier "x" } ];
                 alternate = [];
               };
         };
@@ -197,20 +180,14 @@ let%test_unit "test if else expression" =
                 condition =
                   Ast.Infix_Expression
                     {
-                      left = Ast.Identifier { value = "x" };
+                      left = Ast.Identifier "x";
                       operator = "<";
-                      right = Ast.Identifier { value = "y" };
+                      right = Ast.Identifier "y";
                     };
                 consequence =
-                  [
-                    Ast.Expression_Statement
-                      { value = Ast.Identifier { value = "x" } };
-                  ];
+                  [ Ast.Expression_Statement { value = Ast.Identifier "x" } ];
                 alternate =
-                  [
-                    Ast.Expression_Statement
-                      { value = Ast.Identifier { value = "y" } };
-                  ];
+                  [ Ast.Expression_Statement { value = Ast.Identifier "y" } ];
               };
         };
     ]

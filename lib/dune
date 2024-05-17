@@ -1,6 +1,6 @@
 (library
  (name lib)
- (modules token lexer t_lexer ast parser t_parser)
+ (modules token lexer t_lexer ast parser t_parser object environment evaluator)
  (libraries core stdio ppx_jane)
  (inline_tests)
  (preprocess
