@@ -7,17 +7,17 @@ type _node =
 [@@deriving sexp_of, compare, show]
 
 and statement =
-  | Expression_Statement of { value : expression }
+  | Expression_Statement of expression
   | Let of { name : identifier; value : expression }
-  | Return of { value : expression }
+  | Return of expression
 [@@deriving sexp_of, compare, show]
 
 and expression =
   | Identifier of identifier
   | Integer_Literal of int
   | String_Literal of string
-  | Boolean of { value : bool }
-  | Array_Literal of { value : expression list }
+  | Boolean of bool
+  | Array_Literal of expression list
   | Hash_Literal of (expression * expression) list
   | Prefix_Expression of { operator : string; right : expression }
   | Infix_Expression of {

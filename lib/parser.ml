@@ -58,7 +58,7 @@ let parser_with_error parser error =
   let errors = List.append parser.errors [ error ] in
   advance { parser with errors }
 
-let rec parse parser =
+let rec _parse parser =
   let rec aux parser (statements : Ast.statement list) =
     let res =
       match parser.current with
@@ -94,12 +94,12 @@ and parse_return_statement parser =
   let parser = advance parser in
   let%bind parser, value = parse_expression parser `Lowest in
   let parser = skip parser ~token:Token.Semicolon in
-  Ok (parser, Ast.Return { value })
+  Ok (parser, Ast.Return value)
 
 and parse_expression_statement parser =
   let%bind parser, expr = parse_expression parser `Lowest in
   let parser = skip parser ~token:Token.Semicolon in
-  Ok (parser, Ast.Expression_Statement { value = expr })
+  Ok (parser, Ast.Expression_Statement expr)
 
 and parse_expression parser prec =
   let%bind parser, lexpr = parse_prefix_expression parser in
@@ -201,8 +201,8 @@ and parse_string_literal parser =
 
 and parse_boolean_literal parser =
   match parser.current with
-  | True -> Ok (parser, Ast.Boolean { value = true })
-  | False -> Ok (parser, Ast.Boolean { value = false })
+  | True -> Ok (parser, Ast.Boolean true)
+  | False -> Ok (parser, Ast.Boolean false)
   | _ -> Error "expected boolean"
 
 and parse_integer_literal parser =
@@ -270,7 +270,7 @@ and parse_function_parameters parser =
 
 and parse_array_literal parser =
   let%bind parser, value = parse_expression_list parser Token.Rbracket in
-  Ok (parser, Ast.Array_Literal { value })
+  Ok (parser, Ast.Array_Literal value)
 
 and parse_hash_literal (parser : t) =
   let parser = advance parser in
@@ -295,3 +295,6 @@ and parse_hash_literal (parser : t) =
   match Token.compare parser.current Token.Rbrace = 0 with
   | true -> Ok (parser, Ast.Hash_Literal [])
   | false -> aux parser []
+
+let parse parser = Ast.Program (_parse parser)
+(* Wrapper this is the public interface *)

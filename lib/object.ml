@@ -2,18 +2,14 @@
 
 open! Core
 open! Ast
-(*
-   INTEGER_OBJ      = "INTEGER"
-   BOOLEAN_OBJ      = "BOOLEAN"
-   NULL_OBJ         = "NULL"
-   RETURN_VALUE_OBJ = "RETURN_VALUE"
-   ERROR_OBJ        = "ERROR"
-   FUNCTION_OBJ     = "FUNCTION"
-   STRING_OBJ       = "STRING"
-   BUILTIN_OBJ      = "BUILTIN"
-   ARRAY_OBJ        = "ARRAY"
-   HASH_OBJ         = "HASH"
-*)
+
+module Hashtbl = struct
+  include Core.Hashtbl
+
+  let pp pp_key pp_value ppf values =
+    Hashtbl.iteri values ~f:(fun ~key ~data ->
+        Format.fprintf ppf "@[<1>%a: %a@]@." pp_key key pp_value data)
+end
 
 type t =
   | Integer of int
@@ -26,9 +22,11 @@ type t =
       body : block_statement; (* TODO add environment here *)
     }
   | String of string
-  | Builtin of (t list -> t)
+  (* | Builtin of (t list -> t) *)
   | Array of t list
-  | Hash of (hash_key, hash_pair) Hashtbl.t
+  | Hash of (hash_key * hash_pair) list
+  | Hash_Element of (hash_key * hash_pair)
 
 and hash_key = { type_ : t; key : int64 }
-and hash_pair = { key : t; value : t }
+and hash_pair = { key : t; value : t } [@@deriving show, sexp_of, compare]
+(* TODO make these variants *)
