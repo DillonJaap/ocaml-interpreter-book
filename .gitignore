@@ -3,3 +3,7 @@ _build/*
 _opam
 _opam/*
 
+dune.lock/
+dune.lock/*
+dev-tools.locks/
+dev-tools.locks/*
