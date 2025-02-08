@@ -19,7 +19,7 @@
  (name interpreter)
  (synopsis "A short synopsis")
  (description "A longer description")
- (depends ocaml dune)
+ (depends ocaml dune ocaml-lsp-server ocamlformat dot-merlin-reader)
  (tags
   (topics "to describe" your project)))
 

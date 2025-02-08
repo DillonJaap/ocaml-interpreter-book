@@ -12,6 +12,9 @@ bug-reports: "https://github.com/username/reponame/issues"
 depends: [
   "ocaml"
   "dune" {>= "3.10"}
+  "ocaml-lsp-server"
+  "ocamlformat"
+  "dot-merlin-reader"
   "odoc" {with-doc}
 ]
 build: [
