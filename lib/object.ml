@@ -26,7 +26,11 @@ type t =
   | Array of t list
   | Hash of (hash_key * hash_pair) list
   | Hash_Element of (hash_key * hash_pair)
+[@@deriving show, sexp_of, compare]
 
-and hash_key = { type_ : t; key : int64 }
-and hash_pair = { key : t; value : t } [@@deriving show, sexp_of, compare]
+and hash_key = Hash_Key of { type_ : t; key : int64 }
+[@@deriving show, sexp_of, compare]
+
+and hash_pair = Hash_Pair of { key : t; value : t }
+[@@deriving show, sexp_of, compare]
 (* TODO make these variants *)

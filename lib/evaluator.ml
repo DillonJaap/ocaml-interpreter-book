@@ -30,7 +30,7 @@ let rec eval node env =
             List.map h ~f:(fun pair ->
                 let key = eval (Ast.Expression (fst pair)) env in
                 let value = eval (Ast.Expression (snd pair)) env in
-               Object.Hash_Element ( { type_ = key; key = 0 }, { key; value } )
+                (key, value)
           in
           Object.Hash object_list
       (* | Ast.Identifier i -> Object. i *)
