@@ -10,15 +10,17 @@ and statement =
   | Expression_Statement of expression
   | Let of { name : identifier; value : expression }
   | Return of expression
+  | Block_Statement of block_statement
 [@@deriving sexp_of, compare, show]
 
 and expression =
-  | Identifier of identifier
   | Integer_Literal of int
   | String_Literal of string
   | Boolean of bool
+  | Identifier of identifier
   | Array_Literal of expression list
   | Hash_Literal of (expression * expression) list
+  (* larger expressions *)
   | Prefix_Expression of { operator : string; right : expression }
   | Infix_Expression of {
       left : expression;
